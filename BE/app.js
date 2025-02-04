@@ -6,19 +6,23 @@ const db = require('./config/db');
 const YAML = require('yamljs');
 const swaggerUi = require('swagger-ui-express');
 const CustomerRoute = require('./routes/CustomerRoute');
+const ProductRoute = require('./routes/ProductRoute');
+const StockinRoute = require ('./routes/StockinRoute');
 
 dotenv.config();
 
 const app = express();
-
-app.use(express.json())
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(cors()); 
 app.use(logger); 
-const swaggerDocument = YAML.load('./docs/customer-api.yaml');
+const swaggerDocument = YAML.load('./docs/api-spec.yaml');
 
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/api', CustomerRoute);
+app.use('/api', ProductRoute);
+app.use('/api', StockinRoute)
 
 
 module.exports = app;
