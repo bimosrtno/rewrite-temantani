@@ -1,0 +1,347 @@
+openapi: 3.0.0
+info:
+  title: API SPEC Teman Tani
+  description: API untuk mengelola data Teman Tani
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:5000/api
+    description: Development Server
+
+tags:
+  - name: Customers
+    description: API untuk mengelola customer
+  - name: Products
+    description: API untuk mengelola produk
+  - name: Stockin
+    description: API untuk mengelola stok produk
+
+paths:
+  /customers:
+    get:
+      tags:
+        - Customers
+      summary: Get All Customers
+      description: Mengambil semua customer dari database
+      responses:
+        200:
+          description: List of all customers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Customers retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Customer"
+        500:
+          description: Internal Server Error
+
+    post:
+      tags:
+        - Customers
+      summary: Add New Customer
+      description: Menambahkan customer baru dengan ID otomatis dan status default "Potensial"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "John Doe"
+                phone:
+                  type: string
+                  example: "081234567890"
+                email:
+                  type: string
+                  example: "john@example.com"
+                domisili:
+                  type: string
+                  example: "Jakarta"
+      responses:
+        201:
+          description: Customer added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Customer added successfully"
+                  data:
+                    $ref: "#/components/schemas/Customer"
+        400:
+          description: All required fields must be provided
+        500:
+          description: Internal Server Error
+
+  /customers/{customer_id}/status:
+    put:
+      tags:
+        - Customers
+      summary: Update Customer Status
+      description: Mengubah status customer berdasarkan customer_id
+      parameters:
+        - name: customer_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "CUST001"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "Aktif"
+      responses:
+        200:
+          description: Status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Customer status updated successfully"
+                  data:
+                    type: object
+                    properties:
+                      customer_id:
+                        type: string
+                        example: "CUST001"
+                      status:
+                        type: string
+                        example: "Aktif"
+        400:
+          description: Status field is required
+        404:
+          description: Customer not found
+        500:
+          description: Internal Server Error
+
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Get All Products
+      description: Mengambil semua produk dari database
+      responses:
+        200:
+          description: List of all products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Products retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Product"
+        500:
+          description: Internal Server Error
+
+    post:
+      tags:
+        - Products
+      summary: Add New Product
+      description: Menambahkan produk baru ke database
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_id:
+                  type: string
+                  example: "PPK004"
+                category:
+                  type: string
+                  example: "pupuk"
+                product_name:
+                  type: string
+                  example: "Pupuk Organik"
+                description:
+                  type: string
+                  example: "Pupuk ramah lingkungan"
+                price:
+                  type: number
+                  example: 25000
+                stock:
+                  type: integer
+                  example: 15
+                image:
+                  type: string
+                  example: "https://example.com/image2.jpg"
+      responses:
+        201:
+          description: Product added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product added successfully"
+                  data:
+                    $ref: "#/components/schemas/Product"
+        400:
+          description: Missing required fields
+        500:
+          description: Internal Server Error
+
+  /stockin:
+    get:
+      tags:
+        - Stockin
+      summary: Get All Stock In Entries
+      description: Mengambil semua data stok masuk
+      responses:
+        200:
+          description: List of all stock-in entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Stock-in records retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Stockin"
+        500:
+          description: Internal Server Error
+
+    post:
+      tags:
+        - Stockin
+      summary: Add New Stock In Entry
+      description: Menambahkan stok produk baru ke database dan memperbarui jumlah stok produk secara otomatis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_id:
+                  type: string
+                  example: "PPK004"
+                category:
+                  type: string
+                  example: "pupuk"
+                product_name:
+                  type: string
+                  example: "Pupuk Organik"
+                stock:
+                  type: integer
+                  example: 10
+      responses:
+        201:
+          description: Stock-in entry added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Stock-in entry added successfully"
+                  data:
+                    $ref: "#/components/schemas/Stockin"
+        400:
+          description: Missing required fields
+        500:
+          description: Internal Server Error
+
+components:
+  schemas:
+    Customer:
+      type: object
+      properties:
+        customer_id:
+          type: string
+          example: "CUST001"
+        name:
+          type: string
+          example: "John Doe"
+        phone:
+          type: string
+          example: "081234567890"
+        email:
+          type: string
+          example: "john@example.com"
+        domisili:
+          type: string
+          example: "Jakarta"
+        status:
+          type: string
+          example: "Potensial"
+
+    Product:
+      type: object
+      properties:
+        product_id:
+          type: string
+          example: "PPK004"
+        category:
+          type: string
+          example: "pupuk"
+        product_name:
+          type: string
+          example: "Pupuk Organik"
+        description:
+          type: string
+          example: "Pupuk ramah lingkungan"
+        price:
+          type: number
+          example: 25000
+        stock:
+          type: integer
+          example: 15
+        image:
+          type: string
+          example: "https://example.com/image2.jpg"
+
+    Stockin:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        product_id:
+          type: string
+          example: "PPK004"
+        category:
+          type: string
+          example: "pupuk"
+        product_name:
+          type: string
+          example: "Pupuk Organik"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-02-04T09:30:00Z"
+        stock:
+          type: integer
+          example: 10
