@@ -15,6 +15,8 @@ tags:
     description: API untuk mengelola produk
   - name: Stockin
     description: API untuk mengelola stok produk
+  - name: Sales
+    description: API untuk mengelola transaksi penjualan
 
 paths:
   /customers:
@@ -51,20 +53,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  example: "John Doe"
-                phone:
-                  type: string
-                  example: "081234567890"
-                email:
-                  type: string
-                  example: "john@example.com"
-                domisili:
-                  type: string
-                  example: "Jakarta"
+              $ref: "#/components/schemas/CustomerInput"
       responses:
         201:
           description: Customer added successfully
@@ -109,23 +98,6 @@ paths:
       responses:
         200:
           description: Status updated successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Customer status updated successfully"
-                  data:
-                    type: object
-                    properties:
-                      customer_id:
-                        type: string
-                        example: "CUST001"
-                      status:
-                        type: string
-                        example: "Aktif"
         400:
           description: Status field is required
         404:
@@ -167,44 +139,12 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                product_id:
-                  type: string
-                  example: "PPK004"
-                category:
-                  type: string
-                  example: "pupuk"
-                product_name:
-                  type: string
-                  example: "Pupuk Organik"
-                description:
-                  type: string
-                  example: "Pupuk ramah lingkungan"
-                price:
-                  type: number
-                  example: 25000
-                stock:
-                  type: integer
-                  example: 15
-                image:
-                  type: string
-                  example: "https://example.com/image2.jpg"
+              $ref: "#/components/schemas/ProductInput"
       responses:
         201:
           description: Product added successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Product added successfully"
-                  data:
-                    $ref: "#/components/schemas/Product"
         400:
-          description: Missing required fields
+          description: All required fields must be provided
         500:
           description: Internal Server Error
 
@@ -212,65 +152,61 @@ paths:
     get:
       tags:
         - Stockin
-      summary: Get All Stock In Entries
+      summary: Get All Stockin Records
       description: Mengambil semua data stok masuk
       responses:
         200:
-          description: List of all stock-in entries
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Stock-in records retrieved successfully"
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Stockin"
+          description: List of all stockin records
         500:
           description: Internal Server Error
 
     post:
       tags:
         - Stockin
-      summary: Add New Stock In Entry
-      description: Menambahkan stok produk baru ke database dan memperbarui jumlah stok produk secara otomatis
+      summary: Add New Stock Entry
+      description: Menambahkan stok baru untuk produk
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                product_id:
-                  type: string
-                  example: "PPK004"
-                category:
-                  type: string
-                  example: "pupuk"
-                product_name:
-                  type: string
-                  example: "Pupuk Organik"
-                stock:
-                  type: integer
-                  example: 10
+              $ref: "#/components/schemas/StockinInput"
       responses:
         201:
-          description: Stock-in entry added successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Stock-in entry added successfully"
-                  data:
-                    $ref: "#/components/schemas/Stockin"
+          description: Stock added successfully
         400:
           description: Missing required fields
+        500:
+          description: Internal Server Error
+
+  /sales:
+    get:
+      tags:
+        - Sales
+      summary: Get All Sales Transactions
+      description: Mengambil semua transaksi penjualan dari database
+      responses:
+        200:
+          description: List of all sales transactions
+        500:
+          description: Internal Server Error
+
+    post:
+      tags:
+        - Sales
+      summary: Create a New Sales Transaction
+      description: Menambahkan transaksi penjualan baru
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SalesInput"
+      responses:
+        201:
+          description: Sales transaction created successfully
+        400:
+          description: Missing required fields or insufficient stock
         500:
           description: Internal Server Error
 
@@ -298,6 +234,18 @@ components:
           type: string
           example: "Potensial"
 
+    CustomerInput:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        domisili:
+          type: string
+
     Product:
       type: object
       properties:
@@ -306,42 +254,105 @@ components:
           example: "PPK004"
         category:
           type: string
-          example: "pupuk"
         product_name:
           type: string
-          example: "Pupuk Organik"
         description:
           type: string
-          example: "Pupuk ramah lingkungan"
         price:
           type: number
-          example: 25000
         stock:
           type: integer
-          example: 15
         image:
           type: string
-          example: "https://example.com/image2.jpg"
+
+    ProductInput:
+      type: object
+      properties:
+        category:
+          type: string
+        product_name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        stock:
+          type: integer
+        image:
+          type: string
 
     Stockin:
       type: object
       properties:
-        id:
-          type: integer
-          example: 1
+        stockin_id:
+          type: string
         product_id:
           type: string
-          example: "PPK004"
-        category:
-          type: string
-          example: "pupuk"
-        product_name:
-          type: string
-          example: "Pupuk Organik"
-        timestamp:
-          type: string
-          format: date-time
-          example: "2025-02-04T09:30:00Z"
         stock:
           type: integer
-          example: 10
+        date:
+          type: string
+          format: date-time
+
+    StockinInput:
+      type: object
+      properties:
+        product_id:
+          type: string
+        stock:
+          type: integer
+
+    Sales:
+      type: object
+      properties:
+        transaction_id:
+          type: string
+        customer_id:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        total_price:
+          type: number
+        date:
+          type: string
+          format: date-time
+        status:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              product:
+                type: string
+              quantity:
+                type: integer
+
+    SalesInput:
+      type: object
+      properties:
+        customer_id:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        status:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              product_id:
+                type: string
+              product_name:
+                type: string
+              quantity:
+                type: integer
