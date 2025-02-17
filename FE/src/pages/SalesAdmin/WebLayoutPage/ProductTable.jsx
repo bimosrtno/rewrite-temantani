@@ -25,8 +25,6 @@ const ProductTable = () => {
                             <th className="py-2 px-4 border">Kategori</th>
                             <th className="py-2 px-4 border">Nama Produk</th>
                             <th className="py-2 px-4 border">Deskripsi</th>
-                            <th className="py-2 px-4 border">Harga</th>
-                            <th className="py-2 px-4 border">Stok</th>
                             <th className="py-2 px-4 border">Gambar</th>
                         </tr>
                     </thead>
@@ -38,8 +36,6 @@ const ProductTable = () => {
                                     <td className="py-2 px-4 border">{product.category}</td>
                                     <td className="py-2 px-4 border">{product.product_name}</td>
                                     <td className="py-2 px-4 border">{product.description}</td>
-                                    <td className="py-2 px-4 border">{product.price}</td>
-                                    <td className="py-2 px-4 border">{product.stock}</td>
                                     <td className="py-2 px-4 border">
                                         <a href={product.image} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
                                             {product.image}
