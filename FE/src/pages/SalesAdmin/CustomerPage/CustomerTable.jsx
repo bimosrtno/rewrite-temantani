@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getCustomers, updateCustomerStatus, updateCustomerPhone } from "@/services/customerService";
+import GenerateWhatsappLink from "@/components/GenerateWhatsappLink";
 
 const CustomerTable = () => {
   const [customers, setCustomers] = useState([]);
@@ -39,6 +40,20 @@ const CustomerTable = () => {
     }
   };
 
+  // Function to get status color
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Active":
+        return "bg-green-500 text-white";
+      case "Potensial":
+        return "bg-yellow-500 text-black";
+      case "Inactive":
+        return "bg-red-500 text-white";
+      default:
+        return "bg-green-500 text-white";
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h2 className="text-xl font-semibold mb-4">Customer List</h2>
@@ -73,34 +88,46 @@ const CustomerTable = () => {
               </td>
               <td className="border border-gray-300 p-2">{customer.email}</td>
               <td className="border border-gray-300 p-2">{customer.domisili}</td>
-              <td className="border border-gray-300 p-2">
+              <td className={`border border-gray-300 p-2 font-semibold ${getStatusColor(customer.status)}`}>
                 <select
                   value={customer.status}
                   onChange={(e) => handleStatusChange(customer.customer_id, e.target.value)}
-                  className="border px-2 py-1"
+                  className="border px-2 py-1 bg-transparent text-center"
                 >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                  <option value="Potensial">Potensial</option>
+                  <option value="Active" className="bg-green-500 text-white">Active</option>
+                  <option value="Potensial" className="bg-yellow-500 text-black">Potensial</option>
+                  <option value="Inactive" className="bg-red-500 text-white">Inactive</option>
                 </select>
               </td>
               <td className="border border-gray-300 p-2">
-                {editingPhone === customer.customer_id ? (
-                  <button
-                    onClick={() => handlePhoneChange(customer.customer_id)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded"
-                  >
-                    Save
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setEditingPhone(customer.customer_id)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded"
-                  >
-                    Edit Phone
-                  </button>
-                )}
-              </td>
+  <div className="flex gap-2 justify-center">
+    {/* Button Edit Phone / Save */}
+    {editingPhone === customer.customer_id ? (
+      <button
+        onClick={() => handlePhoneChange(customer.customer_id)}
+        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+      >
+        Save
+      </button>
+    ) : (
+      <button
+        onClick={() => setEditingPhone(customer.customer_id)}
+        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+      >
+        Edit Phone
+      </button>
+    )}
+
+    {/* Button Kirim Pesan (Disamakan dengan Edit Phone) */}
+    <GenerateWhatsappLink
+      phoneNumber={customer.phone}
+      type="customer"
+      buttonClass="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+      buttonText="Message"
+    />
+  </div>
+</td>
+
             </tr>
           ))}
         </tbody>
