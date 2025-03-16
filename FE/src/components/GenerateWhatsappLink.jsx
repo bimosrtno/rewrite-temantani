@@ -1,38 +1,42 @@
-import { useState, useEffect } from "react";
-import { getTemplates } from "@/services/whatsappService";
+import { useEffect, useState } from "react";
+import { getTemplateByType } from "@/services/templateService";
 
 const GenerateWhatsappLink = ({ phoneNumber, type, buttonClass, buttonText }) => {
-    const [template, setTemplate] = useState("");
+  const [template, setTemplate] = useState("");
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchTemplate = async () => {
-            try {
-                const templates = await getTemplates(type);
-                if (templates.length > 0) {
-                    setTemplate(templates[0].template_text);
-                }
-            } catch (error) {
-                console.error("Error fetching template:", error);
-            }
-        };
+  useEffect(() => {
+    const fetchTemplate = async () => {
+      try {
+        const response = await getTemplateByType(type);
+        if (response && response.template_text) setTemplate(response.template_text);
+      } catch (error) {
+        console.error("Failed to fetch template:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        fetchTemplate();
-    }, [type]); 
+    fetchTemplate();
+  }, [type]);
 
-    const formattedPhoneNumber = phoneNumber.startsWith("0") 
-        ? `+62${phoneNumber.slice(1)}`
-        : phoneNumber;  
+  const formatPhoneNumber = (phone) => {
+    if (!phone) return "";
+    return phone.replace(/\D/g, ""); 
+  };
 
-    const encodeMessage = encodeURIComponent(template);
-    const waLink = `https://wa.me/${formattedPhoneNumber}?text=${encodeMessage}`;
+  const formattedPhone = formatPhoneNumber(phoneNumber);
 
-    return (
-        <a href={waLink} target="_blank" rel="noopener noreferrer">
-            <button className={buttonClass}>
-                {buttonText}
-            </button>
-        </a>
-    );
+  return (
+    <a
+      href={`https://wa.me/${formattedPhone}?text=${encodeURIComponent(template)}`}
+      className={buttonClass}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {buttonText}
+    </a>
+  );
 };
 
 export default GenerateWhatsappLink;
