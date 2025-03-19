@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { getCustomers, updateCustomerStatus, updateCustomerPhone } from "@/services/customerService";
+import { getActiveTemplate } from "@/services/templateService";
+import GenerateWhatsappLink from "@/components/GenerateWhatsappLink";
+import { sendEmailBlast } from "@/services/emailService";
 
 const CustomerTable = () => {
   const [customers, setCustomers] = useState([]);
@@ -36,6 +39,54 @@ const CustomerTable = () => {
       fetchCustomers();
     } catch (error) {
       console.error("Failed to update phone:", error);
+    }
+  };
+
+
+  const handleSendEmail = async (email, type = "email") => {
+    if (!email) {
+        alert("Customer tidak memiliki email.");
+        return;
+    }
+    
+    try {
+        // Ambil template aktif
+        const template = await getActiveTemplate(type);
+        
+        if (!template) {
+            alert(`Tidak ada template aktif untuk tipe "${type}".`);
+            return;
+        }
+        
+        // Gunakan template_text dari template
+        const emailContent = template.template_text;
+        
+        // Kirim email dengan template_text dan type
+        const response = await sendEmailBlast(email, emailContent, type);
+        
+        if (response && response.message) {
+            alert("Email berhasil dikirim!");
+        } else {
+            alert("Gagal mengirim email.");
+        }
+    } catch (error) {
+        console.error("Error sending email:", error);
+        alert("Terjadi kesalahan saat mengirim email.");
+    }
+};
+  
+
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Active":
+        return "bg-green-500 text-white";
+      case "Potensial":
+        return "bg-yellow-500 text-white";
+      case "Inactive":
+        return "bg-red-500 text-white";
+      default:
+        return "bg-green-500 text-white";
     }
   };
 
@@ -77,29 +128,45 @@ const CustomerTable = () => {
                 <select
                   value={customer.status}
                   onChange={(e) => handleStatusChange(customer.customer_id, e.target.value)}
-                  className="border px-2 py-1"
+                  className={`border px-2 py-1 text-center rounded font-semibold ${getStatusColor(customer.status)}`}
                 >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                  <option value="Potensial">Potensial</option>
+                  <option value="Active" className="bg-green-500 text-white">Active</option>
+                  <option value="Potensial" className="bg-yellow-500 text-black">Potensial</option>
+                  <option value="Inactive" className="bg-red-500 text-white">Inactive</option>
                 </select>
               </td>
               <td className="border border-gray-300 p-2">
-                {editingPhone === customer.customer_id ? (
+                <div className="flex gap-2 justify-center">
+                  {editingPhone === customer.customer_id ? (
+                    <button
+                      onClick={() => handlePhoneChange(customer.customer_id)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                    >
+                      Save
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setEditingPhone(customer.customer_id)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                    >
+                      Edit Phone
+                    </button>
+                  )}
+
+                  <GenerateWhatsappLink
+                    phoneNumber={customer.phone}
+                    type="marketing"
+                    buttonClass="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                    buttonText="Message"
+                  />
+
                   <button
-                    onClick={() => handlePhoneChange(customer.customer_id)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded"
+                    onClick={() => handleSendEmail(customer.email , "email")}
+                    className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
                   >
-                    Save
+                    Send Email
                   </button>
-                ) : (
-                  <button
-                    onClick={() => setEditingPhone(customer.customer_id)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded"
-                  >
-                    Edit Phone
-                  </button>
-                )}
+                </div>
               </td>
             </tr>
           ))}

@@ -9,6 +9,8 @@ const CustomerRoute = require('./routes/CustomerRoute');
 const ProductRoute = require('./routes/ProductRoute');
 const StockinRoute = require ('./routes/StockinRoute');
 const ArticlesRoute = require('./routes/ArticlesRoute');
+const TemplateRoutes = require('./routes/TemplateRoute');
+const EmailRoutes = require('./routes/EmailRoutes');
 
 dotenv.config();
 
@@ -25,6 +27,9 @@ app.use('/api', CustomerRoute);
 app.use('/api', ProductRoute);
 app.use('/api', StockinRoute);
 app.use('/api', ArticlesRoute);
+app.use ('/api', TemplateRoutes);
+app.use ('/api', EmailRoutes);
+
 
 
 module.exports = app;
